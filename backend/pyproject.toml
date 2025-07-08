@@ -1,0 +1,42 @@
+[project]
+name = "narrow_hh_backend"
+version = "0.1.0"
+description = "Backend FastAPI service for job filtering"
+authors = [{ name = "kryak", email = "mr.vakashev@mail.com" }]
+requires-python = ">=3.12"
+dependencies = [
+    "uvicorn[standard]",
+    "sqlalchemy>=2.0",
+    "asyncpg",
+    "alembic",
+    "pydantic",
+    "httpx",
+    "python-dotenv",
+    "pydantic-settings>=2.10.1",
+    "fastapi[standard]>=0.116.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",                     # Linter + autofixer
+    "black",                    # Code formatter
+    "mypy",                     # Type checker
+    "pytest",                   # Testing
+    "pytest-asyncio",           # Async test support
+    "sqlalchemy[mypy]",         # SQLAlchemy mypy plugin
+]
+
+[tool.ruff]
+line-length = 100
+fix = true
+
+[tool.black]
+line-length = 100
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

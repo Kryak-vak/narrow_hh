@@ -1,0 +1,35 @@
+[project]
+name = "narrow_hh_interface"
+version = "0.1.0"
+description = "Telegram bot interface for job filtering"
+authors = [{ name = "kryak", email = "mr.vakashev@mail.com" }]
+requires-python = ">=3.12"
+dependencies = [
+    "aiogram>=3.0.0",           # Telegram bot framework
+    "httpx",                    # For making HTTP requests to backend
+    "pydantic",                 # Data validation if needed
+    "python-dotenv",            # Load environment configs
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "black",
+    "mypy",
+    "pytest",
+    "pytest-asyncio",
+]
+
+[tool.ruff]
+line-length = 100
+fix = true
+
+[tool.black]
+line-length = 100
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
