@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
 
+    REDIS_HOST: str
+    REDIS_PORT: int = 6379
+
     HH_APP_NAME: str
     HH_CLIENT_ID: str
     HH_CLIENT_SECRET: str

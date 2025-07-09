@@ -1,6 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
-from app.api.deps import service_dep
+from app.api.deps import get_hh_auth_service
 from app.core.config import settings
 from app.services.hh import HHAuthService
 
@@ -13,7 +13,7 @@ router = APIRouter(
 @router.post("/oauth/start")
 async def oauth_start(
         telegram_user_id: int,
-        hh_auth_service: HHAuthService = service_dep(HHAuthService)
+        hh_auth_service: HHAuthService = Depends(get_hh_auth_service)
     ) -> dict:
     """
     HH Oauth start.
@@ -27,7 +27,7 @@ async def oauth_start(
 async def oauth_callback(
         code: str,
         state: str,
-        hh_auth_service: HHAuthService = service_dep(HHAuthService)
+        hh_auth_service: HHAuthService = Depends(get_hh_auth_service)
     ) -> dict:
     """
     HH Oauth callback.

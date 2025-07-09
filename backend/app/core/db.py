@@ -1,8 +1,15 @@
+from redis.asyncio import Redis
 from sqlmodel import Session, create_engine
 
 from app.core.config import settings
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+
+redis = Redis(
+    host=settings.REDIS_HOST,
+    port=settings.REDIS_PORT,
+    decode_responses=True
+)
 
 
 def init_db(session: Session) -> None:

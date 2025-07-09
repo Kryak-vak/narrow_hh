@@ -1,19 +1,17 @@
 import secrets
 from urllib.parse import urlencode
 
-from httpx import AsyncClient
-from redis.asyncio import Redis
-
 from app.infrastructure.clients import HHAsyncClient
+from app.repositories.hh import RedisStateRepository
 
 
 class HHAuthService():
     def __init__(
-            self, redis: Redis,
+            self, state_repository: RedisStateRepository,
             client_id: str, secret_key: str,
             redirect_uri: str, state_exp: int
         ) -> None:
-        self.redis = redis
+        self.state_repository = state_repository
         self.client_id = client_id
         self.secret_key = secret_key
         self.redirect_uri = redirect_uri
@@ -68,16 +66,20 @@ class HHAuthService():
 
     async def generate_state(self, telegram_user_id: int) -> str:
         state = secrets.token_urlsafe(16)
-        await self.redis.setex(f"oauth_state:{state}", self.state_exp, telegram_user_id)
+        await self.state_repository.create_ex(
+            f"oauth_state:{state}",
+            telegram_user_id,
+            self.state_exp
+        )
 
         return state
     
     async def validate_state_and_get_user(self, state: str) -> int:
-        telegram_user_id = await self.redis.get(f"oauth_state:{state}")
+        telegram_user_id = await self.state_repository.get(f"oauth_state:{state}")
         if not telegram_user_id:
             raise RuntimeError('Invalid or expired state')
         
-        await self.redis.delete(f"oauth_state:{state}")
+        await self.state_repository.delete(f"oauth_state:{state}")
 
         return int(telegram_user_id)
 
