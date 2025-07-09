@@ -1,22 +1,22 @@
-from collections.abc import Generator
+from collections.abc import AsyncGenerator
 from typing import Annotated
 
 from fastapi import Depends
 from redis.asyncio import Redis
-from sqlmodel import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.db import engine, redis
+from app.core.db import AsyncSessionLocal, redis
 from app.repositories.hh import RedisStateRepository
 from app.services.hh import HHAuthService
 
 
-def get_session() -> Generator[Session, None, None]:
-    with Session(engine) as session:
+async def get_session() -> AsyncGenerator[AsyncSession, None, None]:
+    async with AsyncSessionLocal() as session:
         yield session
 
 
-SessionDep = Annotated[Session, Depends(get_session)]
+SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
 
 def get_redis() -> Redis:
