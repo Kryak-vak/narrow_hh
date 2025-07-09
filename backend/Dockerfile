@@ -1,8 +1,8 @@
 # Python image with uv pre-installed
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
-# Install the project into `/app`
-WORKDIR /app
+# Install the project into `/backend`
+WORKDIR /backend
 
 # Enable bytecode compilation
 ENV UV_COMPILE_BYTECODE=1
@@ -19,15 +19,16 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
 # Drop --no-dev if necessary
-COPY . /app
+COPY . /backend
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev
 
 # Place executables in the environment at the front of the path
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/backend/.venv/bin:$PATH"
 
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
 
 # Run the FastAPI application by default
 CMD ["fastapi", "dev", "--host", "0.0.0.0", "--app", "app"]
+# CMD ["tail", "-f", "/dev/null"]

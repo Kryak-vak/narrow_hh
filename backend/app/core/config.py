@@ -29,8 +29,13 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
 
-    CLIENT_ID: str
-    CLIENT_SECRET: str
+    HH_APP_NAME: str
+    HH_CLIENT_ID: str
+    HH_CLIENT_SECRET: str
+    HH_REDIRECT_URI: str
+    HH_CONTACT_EMAIL: str
+
+    STATE_EXP: int = 300
 
     @computed_field  # type: ignore[prop-decorator]
     @property
