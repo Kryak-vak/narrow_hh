@@ -33,7 +33,6 @@ services:
 
     db:
         image: postgres:15
-        image_name: narrow_hh-db
         container_name: narrow_hh-db-1
 
         env_file:
