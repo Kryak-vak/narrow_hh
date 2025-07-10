@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, BaseTimeStamped
+from app.infrastructure.database import Base, BaseTimeStamped
 
 
 class User(BaseTimeStamped):

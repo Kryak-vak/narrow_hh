@@ -1,7 +1,5 @@
 import asyncio
-import importlib
 import os
-import pkgutil
 import sys
 from logging.config import fileConfig
 
@@ -10,12 +8,8 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
-import app.models
-from app.core.config import settings
-from app.models.base import Base
-
-for _, module_name, _ in pkgutil.iter_modules(app.models.__path__):
-    importlib.import_module(f"app.models.{module_name}")
+from app.infrastructure.database.migrations import Base
+from core.config import settings
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 

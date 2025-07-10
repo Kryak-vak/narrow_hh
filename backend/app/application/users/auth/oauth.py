@@ -2,10 +2,10 @@ import secrets
 from urllib.parse import urlencode
 
 from app.infrastructure.clients import HHAsyncClient
-from app.repositories.hh import RedisStateRepository
+from app.infrastructure.database import RedisStateRepository
 
 
-class HHAuthService():
+class HHOAuthService():
     def __init__(
             self, state_repository: RedisStateRepository,
             client_id: str, secret_key: str,

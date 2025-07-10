@@ -1,7 +1,7 @@
 from redis.asyncio import Redis
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.core.config import settings
+from core.config import settings
 
 engine = create_async_engine(
     str(settings.SQLALCHEMY_DATABASE_URI)
@@ -18,7 +18,3 @@ redis = Redis(
     port=settings.REDIS_PORT,
     decode_responses=True
 )
-
-
-def init_db(session: AsyncSession) -> None:
-    pass
