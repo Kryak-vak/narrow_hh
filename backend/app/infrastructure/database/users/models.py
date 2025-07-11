@@ -40,6 +40,8 @@ class UserToken(Base):
     __tablename__ = "user_tokens"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    
+    token_type: Mapped[str]
     access_token: Mapped[str]
     refresh_token: Mapped[str]
     expires_in: Mapped[int]

@@ -1,4 +1,4 @@
-from .models import Base, BaseTimeStamped
-from .repositories import AbstractRepository
+from .models import Base, BaseTimeStamped, ModelType
+from .repositories import AbstractSQLAlchemyRepository
 
-__all__ = ["Base", "BaseTimeStamped", "AbstractRepository"]
+__all__ = ["Base", "BaseTimeStamped", "AbstractSQLAlchemyRepository", "ModelType"]

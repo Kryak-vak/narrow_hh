@@ -1,5 +1,11 @@
-from app.infrastructure.database import AbstractRepository
+from app.infrastructure.database import AbstractSQLAlchemyRepository
 
 
-class UserRepository(AbstractRepository):
+class UserRepository(
+        AbstractSQLAlchemyRepository
+    ):
+    pass
+
+
+class UserTokenRepository(AbstractSQLAlchemyRepository):
     pass

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TypeVar
 
 from sqlalchemy import DateTime, MetaData, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -26,3 +27,5 @@ class BaseTimeStamped(Base):
         DateTime(timezone=True), onupdate=func.now()
     )
 
+
+ModelType = TypeVar("ModelType", bound=Base)
