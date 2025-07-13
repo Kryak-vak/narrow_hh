@@ -11,36 +11,37 @@ class User(BaseTimeStamped):
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
     
-    auth_profile: Mapped["TelegramProfile"] = relationship(
+    auth_token: Mapped["HeadHunterToken"] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    
-    token: Mapped["UserToken"] = relationship(
+
+    telegram: Mapped["TelegramAccount"] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
     def __repr__(self):
-        return f"<User(id={self.id})>"
+        return f"<User(id={self.id}, auth_token={self.auth_token})>"
 
 
-class TelegramProfile(BaseTimeStamped):
-    __tablename__ = "telegram_profiles"
+class TelegramAccount(BaseTimeStamped):
+    __tablename__ = "telegram_accounts"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     telegram_id: Mapped[int] = mapped_column(unique=True)
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), unique=True)
-    user: Mapped["User"] = relationship(back_populates="auth_profile")
+    user: Mapped["User"] = relationship(back_populates="telegram")
 
     def __repr__(self):
         return f"<TelegramProfile(id={self.id}, telegram_id={self.telegram_id})>"
 
 
-class UserToken(Base):
-    __tablename__ = "user_tokens"
+class HeadHunterToken(Base):
+    __tablename__ = "head_hunter_tokens"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     
+    hh_user_id: Mapped[str]
     token_type: Mapped[str]
     access_token: Mapped[str]
     refresh_token: Mapped[str]
@@ -50,4 +51,6 @@ class UserToken(Base):
     user: Mapped["User"] = relationship(back_populates="token")
     
     def __repr__(self):
-        return f"<UserToken(id={self.id}, user_id={self.user_id}, expires_in={self.expires_in})>"
+        return f"<HeadHunterToken(id={self.id}, " \
+               f"user_id={self.user_id}, " \
+               f"expires_in={self.expires_in})>"
