@@ -13,8 +13,9 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
-redis = Redis(
+redis_client = Redis(
     host=settings.REDIS_HOST,
     port=settings.REDIS_PORT,
+    password=settings.REDIS_PASSWORD,
     decode_responses=True
 )

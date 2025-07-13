@@ -1,7 +1,7 @@
 import secrets
 from urllib.parse import urlencode
 
-from app.application.users.auth.dto import OauthTokensDTO
+from app.application.hh.auth.dto import OauthTokensDTO
 from app.infrastructure.clients import HHAsyncClient
 from app.infrastructure.database import RedisStateRepository
 from app.infrastructure.database.users.repositories import UserTokenRepository
@@ -12,14 +12,14 @@ class HHOAuthService():
             self,
             client_id: str, secret_key: str,
             redirect_uri: str,
-            state_repository: RedisStateRepository,
-            token_repository: UserTokenRepository
+            state_repo: RedisStateRepository,
+            token_repo: UserTokenRepository
         ) -> None:
         self.client_id = client_id
         self.secret_key = secret_key
         self.redirect_uri = redirect_uri
-        self.state_repository = state_repository
-        self.token_repository = token_repository
+        self.state_repo = state_repo
+        self.user_token_repo = token_repo
 
         self.hh_authorize_url = 'https://hh.ru/oauth/authorize'
         self.hh_token_url = 'https://api.hh.ru/token'
@@ -71,16 +71,16 @@ class HHOAuthService():
 
     async def generate_state(self, telegram_id: int) -> str:
         state = secrets.token_urlsafe(16)
-        await self.state_repository.create_ex(state, telegram_id)
+        await self.state_repo.create_ex(state, telegram_id)
 
         return state
     
     async def validate_state_and_get_user(self, state: str) -> int:
-        telegram_id = await self.state_repository.get(state)
+        telegram_id = await self.state_repo.get(state)
         if not telegram_id:
             raise RuntimeError('Invalid or expired state')
         
-        await self.state_repository.delete(state)
+        await self.state_repo.delete(state)
 
         return int(telegram_id)
 

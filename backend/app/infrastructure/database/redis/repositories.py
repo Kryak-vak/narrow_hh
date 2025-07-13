@@ -4,8 +4,8 @@ from core.config import settings
 
 
 class RedisStateRepository:
-    def __init__(self, redis: Redis) -> None:
-        self.redis = redis
+    def __init__(self, redis_client: Redis) -> None:
+        self.redis_client = redis_client
         self._state_key_prefix = "oauth_state:"
     
     def _state_to_key(self, state: str) -> str:
@@ -13,14 +13,14 @@ class RedisStateRepository:
 
     async def create_ex(self, state: str, value: str, exp: int = settings.STATE_EXP) -> None:
         state_key = self._state_to_key(state)
-        await self.redis.setex(state_key, exp, value)
+        await self.redis_client.setex(state_key, exp, value)
     
     async def get(self, state: str) -> str | None:
         state_key = self._state_to_key(state)
-        value = await self.redis.get(state_key)
+        value = await self.redis_client.get(state_key)
 
         return value
     
     async def delete(self, state: str) -> None:
         state_key = self._state_to_key(state)
-        await self.redis.delete(state_key)
+        await self.redis_client.delete(state_key)

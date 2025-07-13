@@ -1,5 +1,6 @@
 import secrets
 import warnings
+from pathlib import Path
 from typing import Literal
 
 from pydantic import (
@@ -11,10 +12,12 @@ from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=BASE_DIR.parent / ".env",
         env_ignore_empty=True,
         extra="ignore",
     )
@@ -31,6 +34,7 @@ class Settings(BaseSettings):
 
     REDIS_HOST: str
     REDIS_PORT: int = 6379
+    REDIS_PASSWORD: str
 
     HH_APP_NAME: str
     HH_CLIENT_ID: str

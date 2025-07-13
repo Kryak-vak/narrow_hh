@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from app.application.users.auth.oauth import HHOAuthService
-from app.presentation.users.deps import get_hh_auth_service
-from app.presentation.users.schemas import AuthorizeURLSchema, ErrorResponse
+from app.application.hh.auth.oauth import HHOAuthService
+from app.presentation.hh.auth.oauth.deps import get_hh_auth_service
+from app.presentation.hh.auth.oauth.schemas import AuthorizeURLSchema, ErrorResponse
 from core.config import settings
 
 router = APIRouter(
