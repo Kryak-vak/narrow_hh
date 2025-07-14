@@ -1,10 +1,12 @@
 import secrets
 from urllib.parse import urlencode
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.application.hh.auth.dto import OauthTokensDTO
 from app.infrastructure.clients import HHAsyncClient
 from app.infrastructure.database import RedisStateRepository
-from app.infrastructure.database.users.repositories import UserTokenRepository
+from app.infrastructure.database.users.repositories import HeadHunterTokenRepository
 
 
 class HHOAuthService():
@@ -12,21 +14,24 @@ class HHOAuthService():
             self,
             client_id: str, secret_key: str,
             redirect_uri: str,
+            session: AsyncSession,
             state_repo: RedisStateRepository,
-            token_repo: UserTokenRepository
+            hh_token_repo: HeadHunterTokenRepository
         ) -> None:
         self.client_id = client_id
         self.secret_key = secret_key
         self.redirect_uri = redirect_uri
-        self.state_repo = state_repo
-        self.user_token_repo = token_repo
 
+        self.state_repo = state_repo
+        
+        self.session = session
+        self.hh_token_repo = hh_token_repo
         self.hh_authorize_url = 'https://hh.ru/oauth/authorize'
         self.hh_token_url = 'https://api.hh.ru/token'
         self.hh_client = HHAsyncClient
     
-    async def create_authorize_url(self, telegram_id: int):
-        state = await self.generate_state(telegram_id)
+    async def create_authorize_url(self):
+        state = await self.generate_state()
 
         query = urlencode({
             "response_type": "code",
@@ -38,7 +43,7 @@ class HHOAuthService():
         return f"{self.hh_authorize_url}?{query}"
     
     async def get_tokens(self, authorization_code: str, state: str) -> str:
-        telegram_id = await self.validate_state_and_get_user(state)
+        await self.validate_state_and_get_user(state)
         
         tokens_data = await self.make_token_request(authorization_code)
         tokens_dto = OauthTokensDTO(**tokens_data)
@@ -69,19 +74,19 @@ class HHOAuthService():
 
         return token_data
 
-    async def generate_state(self, telegram_id: int) -> str:
+    async def generate_state(self) -> str:
         state = secrets.token_urlsafe(16)
-        await self.state_repo.create_ex(state, telegram_id)
+        await self.state_repo.create_ex(state)
 
         return state
     
     async def validate_state_and_get_user(self, state: str) -> int:
-        telegram_id = await self.state_repo.get(state)
-        if not telegram_id:
-            raise RuntimeError('Invalid or expired state')
+        await self.state_repo.get(state)
+        # if not telegram_id:
+            # raise RuntimeError('Invalid or expired state')
         
         await self.state_repo.delete(state)
 
-        return int(telegram_id)
+        # return int(telegram_id)
 
         

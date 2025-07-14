@@ -9,7 +9,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.infrastructure.database.migrations import Base
-from core.config import settings
+from config.database import database_config
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -35,7 +35,7 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    return str(settings.SQLALCHEMY_DATABASE_URI)
+    return str(database_config.SQLALCHEMY_DATABASE_URI)
 
 
 def run_migrations_offline() -> None:

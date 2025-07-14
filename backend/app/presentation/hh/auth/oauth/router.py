@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app.application.hh.auth.oauth import HHOAuthService
 from app.presentation.hh.auth.oauth.deps import get_hh_auth_service
 from app.presentation.hh.auth.oauth.schemas import AuthorizeURLSchema, ErrorResponse
-from core.config import settings
+from config.hh import hh_config
 
 router = APIRouter(
     prefix="/hh",
@@ -16,19 +16,18 @@ router = APIRouter(
     response_model=AuthorizeURLSchema
 )
 async def oauth_start(
-        telegram_user_id: int,
         hh_auth_service: HHOAuthService = Depends(get_hh_auth_service)
     ) -> dict:
     """
     HH Oauth start.
     """
-    authorize_url = await hh_auth_service.create_authorize_url(telegram_user_id)
+    authorize_url = await hh_auth_service.create_authorize_url()
 
     return AuthorizeURLSchema(url=authorize_url)
 
 
 @router.post(
-    f"{settings.HH_REDIRECT_URI}",
+    f"{hh_config.redirect_uri}",
     responses={
         400: {"model": ErrorResponse, "description": "User denied access"}
     }

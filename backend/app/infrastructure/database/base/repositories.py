@@ -19,7 +19,7 @@ class AbstractSQLAlchemyRepository(
         self._session = session
     
     def _to_dto(self, model: ModelType, from_attributes: bool = True) -> ReadDTOType:
-        self.read_dto.model_validate(model, from_attributes=from_attributes)
+        return self.read_dto.model_validate(model, from_attributes=from_attributes)
 
     async def create(self, create_dto: CreateDTOType) -> ReadDTOType:
         stmt = insert(self.model).values(create_dto.model_dump()).returning(self.model)
@@ -39,7 +39,7 @@ class AbstractSQLAlchemyRepository(
     async def get(self, **kwargs: str | UUID) -> ReadDTOType:
         stmt = select(self.model).filter_by(**kwargs)
         result = await self._session.scalar(stmt)
-        return self._to_dto(result)
+        return self._to_dto(result) if result else None
 
     async def filter(self, **kwargs: str | UUID) -> list[ReadDTOType]:
         stmt = select(self.model).filter_by(**kwargs)

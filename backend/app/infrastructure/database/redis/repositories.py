@@ -1,6 +1,6 @@
 from redis import Redis
 
-from core.config import settings
+from config.redis import redis_config
 
 
 class RedisStateRepository:
@@ -11,7 +11,7 @@ class RedisStateRepository:
     def _state_to_key(self, state: str) -> str:
         return f"{self._state_key_prefix}{state}"
 
-    async def create_ex(self, state: str, value: str, exp: int = settings.STATE_EXP) -> None:
+    async def create_ex(self, state: str, value: str, exp: int = redis_config.state_exp) -> None:
         state_key = self._state_to_key(state)
         await self.redis_client.setex(state_key, exp, value)
     
