@@ -9,7 +9,7 @@ from app.infrastructure.database import BaseTimeStamped
 class User(BaseTimeStamped):
     __tablename__ = "users"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    id: Mapped[UUID] = mapped_column(primary_key=True)
     hh_user_id: Mapped[str] = mapped_column(unique=True, nullable=False)
     
     hh_token: Mapped["HeadHunterToken"] = relationship(

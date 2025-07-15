@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.hh.auth.dto import HHUserDTO, OauthTokensDTO
 from app.application.hh.auth.oauth import HHOAuthService
 from app.application.users.dto import (
-    UserCreateDTO,
+    UserCreateDTO,Service
     UserDTO,
 )
 from app.infrastructure.database.users.repositories import UserRepository
