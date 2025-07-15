@@ -1,26 +1,30 @@
 from redis import Redis
 
+from app.infrastructure.database.base.repositories import AbstractRedisRepository
 from config.redis import redis_config
 
 
-class RedisStateRepository:
+class RedisStateRepository(AbstractRedisRepository):
     def __init__(self, redis_client: Redis) -> None:
-        self.redis_client = redis_client
         self._state_key_prefix = "oauth_state:"
+
+        super().__init__(redis_client=redis_client)
     
     def _state_to_key(self, state: str) -> str:
         return f"{self._state_key_prefix}{state}"
 
-    async def create_ex(self, state: str, value: str, exp: int = redis_config.state_exp) -> None:
+    async def create_ex(
+            self, state: str,
+            value: str = "ok",
+            exp: int = redis_config.state_exp
+        ) -> None:
         state_key = self._state_to_key(state)
-        await self.redis_client.setex(state_key, exp, value)
+        await super().create_ex(state_key, value, exp)
     
     async def get(self, state: str) -> str | None:
         state_key = self._state_to_key(state)
-        value = await self.redis_client.get(state_key)
-
-        return value
+        return await super().get(state_key)
     
     async def delete(self, state: str) -> None:
         state_key = self._state_to_key(state)
-        await self.redis_client.delete(state_key)
+        await super().delete(state_key)

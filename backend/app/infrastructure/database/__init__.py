@@ -1,10 +1,16 @@
-from .base import AbstractSQLAlchemyRepository, Base, BaseTimeStamped, ModelType
+from .base import (
+    AbstractRedisRepository,
+    AbstractSQLAlchemyRepository,
+    Base,
+    BaseTimeStamped,
+    ModelType,
+)
 from .db import AsyncSessionLocal, engine, redis_client
 from .redis.repositories import RedisStateRepository
 
 __all__ = [
     "Base", "BaseTimeStamped", "ModelType",
-    "AbstractSQLAlchemyRepository", "RedisStateRepository", 
+    "AbstractSQLAlchemyRepository", "AbstractRedisRepository",
+    "RedisStateRepository", "redis_client",
     "AsyncSessionLocal", "engine",
-    "redis_client"
 ]

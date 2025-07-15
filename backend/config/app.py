@@ -25,3 +25,10 @@ class AppConfig(BaseSettings):
 
 
 app_config = AppConfig()  # type: ignore
+
+
+INTERFACE_ALLOWLIST = {
+    "https://bot.interface.com",
+    "https://web.interface.com",
+    "http://localhost:3000",
+}

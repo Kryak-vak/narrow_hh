@@ -2,6 +2,7 @@ from abc import ABC
 from typing import Generic
 from uuid import UUID
 
+from redis import Redis
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -52,3 +53,24 @@ class AbstractSQLAlchemyRepository(
     async def delete(self, pk: int | UUID) -> None:
         stmt = delete(self.model).where(self.model.id == pk)  # type: ignore[attr-defined]
         await self._session.scalar(stmt)
+
+
+class AbstractRedisRepository:
+    def __init__(self, redis_client: Redis) -> None:
+        self.redis_client = redis_client
+    
+    async def create(self, key: str, value) -> None:
+        await self.redis_client.set(key, value)
+
+    async def create_ex(
+            self, key: str,
+            value: str = "ok",
+            exp: int = 300
+        ) -> None:
+        await self.redis_client.setex(key, exp, value)
+    
+    async def get(self, key: str) -> str | None:
+        return await self.redis_client.get(key)
+    
+    async def delete(self, key: str) -> None:
+        await self.redis_client.delete(key)

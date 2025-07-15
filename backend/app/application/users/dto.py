@@ -5,18 +5,22 @@ from pydantic import BaseModel, ConfigDict
 
 
 # User DTO's
-class UserDTO(BaseModel):
+class UserBaseDTO(BaseModel):
+    hh_user_id: str
+
+
+class UserDTO(UserBaseDTO):
     id: UUID
-    token: Optional["HeadHunterTokenNestedDTO"] = None
+    hh_token: Optional["HeadHunterTokenNestedDTO"] = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserCreateDTO(BaseModel):
+class UserCreateDTO(UserBaseDTO):
     pass
 
 
-class UserUpdateDTO(BaseModel):
+class UserUpdateDTO(UserBaseDTO):
     pass
 
 

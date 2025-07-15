@@ -7,3 +7,6 @@ class OauthTokensDTO(BaseModel):
     refresh_token: str
     expires_in: int
 
+
+class HHUserDTO(BaseModel):
+    id: str
