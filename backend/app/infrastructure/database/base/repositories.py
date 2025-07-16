@@ -3,10 +3,11 @@ from typing import Generic
 from uuid import UUID
 
 from redis import Redis
+from redis.typing import ExpiryT
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common_types import CreateDTOType, ReadDTOType, UpdateDTOType
+from app.common_types import CreateDTOType, ReadDTOType, RedisHash, RedisPrimitive, UpdateDTOType
 from app.infrastructure.database.base.models import ModelType
 
 
@@ -21,6 +22,12 @@ class AbstractSQLAlchemyRepository(
     
     def _to_dto(self, model: ModelType, from_attributes: bool = True) -> ReadDTOType:
         return self.read_dto.model_validate(model, from_attributes=from_attributes)
+
+    async def refresh(self, read_dto: ReadDTOType) -> ReadDTOType:
+        model_instance = await self.get(read_dto.id)  # type: ignore[attr-defined]
+        self._session.refresh(model_instance)
+
+        return self._to_dto(model_instance)
 
     async def create(self, create_dto: CreateDTOType) -> ReadDTOType:
         stmt = insert(self.model).values(create_dto.model_dump()).returning(self.model)
@@ -56,21 +63,53 @@ class AbstractSQLAlchemyRepository(
 
 
 class AbstractRedisRepository:
-    def __init__(self, redis_client: Redis) -> None:
+    def __init__(
+            self, redis_client: Redis,
+            key_namespace: str | None = None,
+            default_exp: ExpiryT = 300
+        ) -> None:
+        self.key_namespace = key_namespace if key_namespace else ""
         self.redis_client = redis_client
+        self.default_exp = default_exp
     
-    async def create(self, key: str, value) -> None:
-        await self.redis_client.set(key, value)
-
+    def _add_namespace_to_key(self, key: str) -> str:
+        return f"{self.key_namespace}{key}"
+    
+    async def create(self, key: str, value: RedisPrimitive = "ok", exp: ExpiryT = None) -> None:
+        key = self._add_namespace_to_key(key)
+        await self.redis_client.set(name=key, value=value, ex=exp)
+    
     async def create_ex(
             self, key: str,
-            value: str = "ok",
-            exp: int = 300
+            value: RedisPrimitive = "ok",
+            exp: ExpiryT = None
         ) -> None:
-        await self.redis_client.setex(key, exp, value)
+        exp = exp if exp else self.default_exp
+        await self.create(key=key, value=value, exp=exp)
+
+    async def create_hash(
+            self, key: str,
+            mapping: RedisHash,
+            exp: ExpiryT = None
+        ) -> None:
+        key = self._add_namespace_to_key(key)
+        await self.redis_client.hset(key, mapping=mapping)
+        
+        if exp:
+            await self.redis_client.expire(key, exp)
+
+    async def create_hash_ex(
+            self, key: str,
+            mapping: RedisHash,
+            exp: ExpiryT = None
+        ) -> None:
+        exp = exp if exp else self.default_exp
+        await self.create_hash(key=key, mapping=mapping, exp=exp)
     
     async def get(self, key: str) -> str | None:
+        key = self._add_namespace_to_key(key)
         return await self.redis_client.get(key)
     
     async def delete(self, key: str) -> None:
+        key = self._add_namespace_to_key(key)
         await self.redis_client.delete(key)

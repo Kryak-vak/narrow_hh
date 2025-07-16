@@ -1,9 +1,9 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.infrastructure.database import BaseTimeStamped
+from app.infrastructure.database.base import AbstractTokenModel, BaseTimeStamped
 
 
 class User(BaseTimeStamped):
@@ -15,20 +15,30 @@ class User(BaseTimeStamped):
     hh_token: Mapped["HeadHunterToken"] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    
+    token: Mapped["UserToken"] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<User(id={self.id})>"
 
 
-class HeadHunterToken(BaseTimeStamped):
-    __tablename__ = "head_hunter_tokens"
+class UserToken(AbstractTokenModel):
+    __tablename__ = "user_tokens"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), unique=True)
+    user: Mapped["User"] = relationship(back_populates="token")
     
-    token_type: Mapped[str]
-    access_token: Mapped[str]
-    refresh_token: Mapped[str]
-    expires_in: Mapped[int]
+    def __repr__(self):
+        return (
+            f"<UserToken(id={self.id}, "
+            f"user_id={self.user_id})>"
+        )
+
+
+class HeadHunterToken(AbstractTokenModel):
+    __tablename__ = "head_hunter_tokens"
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), unique=True)
     user: Mapped["User"] = relationship(back_populates="hh_token")

@@ -28,4 +28,15 @@ class BaseTimeStamped(Base):
     )
 
 
+class AbstractTokenModel(BaseTimeStamped):
+    __abstract__ = True
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    
+    token_type: Mapped[str]
+    access_token: Mapped[str]
+    refresh_token: Mapped[str]
+    expires_in: Mapped[int]
+
+
 ModelType = TypeVar("ModelType", bound=Base)

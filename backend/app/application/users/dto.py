@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from app.application.common.dto import AbstractTokenBaseDTO, AbstractTokenUpdateDTO
+
 
 # User DTO's
 class UserBaseDTO(BaseModel):
@@ -11,7 +13,8 @@ class UserBaseDTO(BaseModel):
 
 class UserDTO(UserBaseDTO):
     id: UUID
-    hh_token: Optional["HeadHunterTokenNestedDTO"] = None
+    hh_token: Optional["TokenNestedDTO"] = None
+    token: Optional["TokenNestedDTO"] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -24,33 +27,27 @@ class UserUpdateDTO(UserBaseDTO):
     pass
 
 
-# HeadHunterToken DTO's
-class HeadHunterTokenBaseDTO(BaseModel):
-    token_type: str
-    access_token: str
-    refresh_token: str
-    expires_in: int
+# Token DTO's (for both HeadHunterToken and UserToken)
+class TokenBaseDTO(AbstractTokenBaseDTO):
+    pass
 
 
-class HeadHunterTokenNestedDTO(HeadHunterTokenBaseDTO):
+class TokenNestedDTO(TokenBaseDTO):
     id: int
 
 
-class HeadHunterTokenDTO(HeadHunterTokenNestedDTO):
+class TokenDTO(TokenNestedDTO):
     user_id: UUID
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class HeadHunterTokenCreateDTO(HeadHunterTokenBaseDTO):
+class TokenCreateDTO(TokenBaseDTO):
     user_id: UUID
 
 
-class HeadHunterTokenUpdateDTO(BaseModel):
-    token_type: str | None = None
-    access_token: str | None = None
-    refresh_token: str | None = None
-    expires_in: int | None = None
+class TokenUpdateDTO(AbstractTokenUpdateDTO):
+    pass
 
 
 UserDTO.model_rebuild()

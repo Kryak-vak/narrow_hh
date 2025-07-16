@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 
 
 class AbstractInputSchema(BaseModel):
@@ -7,3 +7,11 @@ class AbstractInputSchema(BaseModel):
 
 class AbstractOutputSchema(BaseModel):
     pass
+
+
+class URLSchema(AbstractInputSchema):
+    url: HttpUrl
+
+
+class ErrorResponse(AbstractOutputSchema):
+    error: str

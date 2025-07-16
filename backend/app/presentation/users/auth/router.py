@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from app.application.hh.auth.oauth import HHOAuthService
-from app.presentation.hh.auth.oauth.deps import get_hh_auth_service
-from app.presentation.hh.auth.oauth.schemas import AuthorizeURLSchema, ErrorResponse
+from app.application.users.auth.user import UserAuthService
+from app.presentation.schemas import ErrorResponse, URLSchema
+from app.presentation.users.auth.deps import get_user_auth_service
+from app.presentation.users.auth.schemas import StartAuthPayloadSchema
 from config.hh import hh_config
 
 router = APIRouter(
@@ -13,17 +14,22 @@ router = APIRouter(
 
 @router.post(
     "/oauth/start", 
-    response_model=AuthorizeURLSchema
+    response_model=URLSchema
 )
 async def oauth_start(
-        hh_auth_service: HHOAuthService = Depends(get_hh_auth_service)
+        payload: StartAuthPayloadSchema,
+        user_auth_service: UserAuthService = Depends(get_user_auth_service)
     ) -> dict:
     """
     HH Oauth start.
     """
-    authorize_url = await hh_auth_service.create_authorize_url()
+    authorize_url = await user_auth_service.start_auth(
+        state=payload.state,
+        notify_url=payload.notify_url,
+        redirect_url=payload.redirect_url
+    )
 
-    return AuthorizeURLSchema(url=authorize_url)
+    return URLSchema(url=authorize_url)
 
 
 @router.post(
@@ -36,7 +42,7 @@ async def oauth_callback(
         code: str,
         state: str,
         error: str = None,
-        hh_auth_service: HHOAuthService = Depends(get_hh_auth_service)
+        user_auth_service: UserAuthService = Depends(get_user_auth_service)
     ) -> dict:
     """
     HH Oauth callback.

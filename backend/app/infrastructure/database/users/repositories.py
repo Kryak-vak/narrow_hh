@@ -1,15 +1,13 @@
-from sqlalchemy import select
-
 from app.application.users.dto import (
-    HeadHunterTokenCreateDTO,
-    HeadHunterTokenDTO,
-    HeadHunterTokenUpdateDTO,
+    TokenCreateDTO,
+    TokenDTO,
+    TokenUpdateDTO,
     UserCreateDTO,
     UserDTO,
     UserUpdateDTO,
 )
 from app.infrastructure.database import AbstractSQLAlchemyRepository
-from app.infrastructure.database.users.models import HeadHunterToken, User
+from app.infrastructure.database.users.models import HeadHunterToken, User, UserToken
 
 
 class UserRepository(
@@ -27,10 +25,22 @@ class UserRepository(
 class HeadHunterTokenRepository(
         AbstractSQLAlchemyRepository[
             HeadHunterToken,
-            HeadHunterTokenDTO,
-            HeadHunterTokenCreateDTO,
-            HeadHunterTokenUpdateDTO
+            TokenDTO,
+            TokenCreateDTO,
+            TokenUpdateDTO
         ]
     ):
     model = HeadHunterToken
-    read_dto = HeadHunterTokenDTO
+    read_dto = TokenDTO
+
+
+class UserTokenRepository(
+        AbstractSQLAlchemyRepository[
+            UserToken,
+            TokenDTO,
+            TokenCreateDTO,
+            TokenUpdateDTO
+        ]
+    ):
+    model = UserToken
+    read_dto = TokenDTO
