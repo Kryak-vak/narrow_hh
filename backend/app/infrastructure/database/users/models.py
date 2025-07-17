@@ -1,9 +1,9 @@
 from uuid import UUID
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.infrastructure.database.base import AbstractTokenModel, BaseTimeStamped
+from app.infrastructure.database.base import BaseTimeStamped
 
 
 class User(BaseTimeStamped):
@@ -16,7 +16,7 @@ class User(BaseTimeStamped):
         back_populates="user", cascade="all, delete-orphan"
     )
     
-    token: Mapped["UserToken"] = relationship(
+    refresh_token: Mapped[list["UserRefreshToken"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
@@ -24,21 +24,31 @@ class User(BaseTimeStamped):
         return f"<User(id={self.id})>"
 
 
-class UserToken(AbstractTokenModel):
-    __tablename__ = "user_tokens"
+class UserRefreshToken(BaseTimeStamped):
+    __tablename__ = "user_refresh_tokens"
 
+    id: Mapped[str] = mapped_column(String(255), primary_key=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), unique=True)
     user: Mapped["User"] = relationship(back_populates="token")
+
+    is_blacklisted: Mapped[bool] = mapped_column(default=False)
     
     def __repr__(self):
         return (
-            f"<UserToken(id={self.id}, "
+            f"<UserRefreshToken(id={self.id}, "
             f"user_id={self.user_id})>"
         )
 
 
-class HeadHunterToken(AbstractTokenModel):
+class HeadHunterToken(BaseTimeStamped):
     __tablename__ = "head_hunter_tokens"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    access_token: Mapped[str] = mapped_column(String(255))
+    token_type: Mapped[str] = mapped_column(String(50))
+    expires_in: Mapped[int]
+    refresh_token: Mapped[str] = mapped_column(String(255))
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), unique=True)
     user: Mapped["User"] = relationship(back_populates="hh_token")

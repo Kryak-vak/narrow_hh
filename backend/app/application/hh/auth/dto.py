@@ -1,10 +1,11 @@
 from pydantic import BaseModel
 
-from app.application.common.dto import AbstractTokenBaseDTO
 
-
-class OauthTokenDTO(AbstractTokenBaseDTO):
-    pass
+class OauthTokenDTO(BaseModel):
+    token_type: str
+    access_token: str
+    refresh_token: str
+    expires_in: int
 
 
 class HeadHunterUserDTO(BaseModel):

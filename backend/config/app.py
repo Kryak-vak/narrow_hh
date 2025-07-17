@@ -14,14 +14,15 @@ class AppConfig(BaseSettings):
         env_ignore_empty=True,
         extra="ignore",
     )
-    API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
-    ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
-    PROJECT_NAME: str
+    api_v1_str: str = "/api/v1"
+    secret_key: str = secrets.token_urlsafe(32)
+    enviroment: Literal["local", "staging", "production"] = "local"
+
+    project_name: str
     
-    FIRST_SUPERUSER: str
-    FIRST_SUPERUSER_PASSWORD: str
+    first_superuser: str
+    first_superuser_password: str
 
 
 app_config = AppConfig()  # type: ignore
