@@ -11,7 +11,6 @@ class HHAsyncClient(httpx.AsyncClient):
     me_url = 'https://api.hh.ru/me'
     client_id = hh_config.client_id
     secret_key = hh_config.client_secret
-    redirect_uri = hh_config.redirect_uri
 
     def __init__(self, *args, **kwargs) -> None:
         default_headers = {
@@ -24,17 +23,17 @@ class HHAsyncClient(httpx.AsyncClient):
         super().__init__(headers=headers, *args, **kwargs)
     
     @classmethod
-    async def create_user_authorize_url(cls, state: str) -> str:
+    def create_user_authorize_url(cls, state: str, redirect_uri: str) -> str:
         query = urlencode({
             "response_type": "code",
             "client_id": cls.client_id,
-            "redirect_uri": cls.redirect_uri,
-            "state": state
+            "state": state,
+            "redirect_uri": redirect_uri,
         })
 
         return f"{cls.authorize_url}?{query}"
 
-    async def make_token_request(self, authorization_code: str):
+    async def make_token_request(self, authorization_code: str, redirect_uri: str):
         headers = {
             **self.headers,
             "Content-Type": "application/x-www-form-urlencoded"
@@ -44,7 +43,7 @@ class HHAsyncClient(httpx.AsyncClient):
             "grant_type": "authorization_code",
             "client_id": self.client_id,
             "client_secret": self.secret_key,
-            "redirect_uri": self.redirect_uri,
+            "redirect_uri": redirect_uri,
             "code": authorization_code,
         }
 

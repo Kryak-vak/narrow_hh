@@ -46,21 +46,18 @@ class UserAuthService:
     
     async def start_auth_hh(
             self, state: str,
-            notify_url: str = None,
             interface_redirect_url: str = None
-        ):
-        if notify_url:
-            value_map = {"notify_url": notify_url}
-        if interface_redirect_url:
-            value_map = {"interface_redirect_url": interface_redirect_url}
-        
-        self.state_manager.set_state_hash_ex(state, value_map)
+        ) -> str:
+        await self.state_manager.set_state_ex(state)
 
-        return await self.hh_auth_service.get_user_authorize_url(state)
+        return self.hh_auth_service.get_user_authorize_url(state, interface_redirect_url)
     
     async def login(self, authorization_code: str, state: str):
-        user_dto = await self._get_or_create_user_hh(authorization_code, state)
+        await self.state_manager.validate_state(state)
+
+        user_dto = await self._get_or_create_user_hh(authorization_code)
         token_pair = self._create_token_pair(user_dto.id)
+        
         await self.__create_refresh_token_in_database(token_pair.refresh_token, user_dto.id)
 
         return token_pair
@@ -83,8 +80,8 @@ class UserAuthService:
             refresh_token=refresh_token
         )
 
-    async def _get_or_create_user_hh(self, authorization_code: str, state: str) -> UserDTO:
-        hh_oauth_tokens_dto = await self._authorize_user_hh(authorization_code, state)
+    async def _get_or_create_user_hh(self, authorization_code: str) -> UserDTO:
+        hh_oauth_tokens_dto = await self._authorize_user_hh(authorization_code)
         hh_user_dto = await self._get_hh_user_info(hh_oauth_tokens_dto.access_token)
         
         user_dto = await self.user_repo.get(hh_user_id=hh_user_dto.id)
@@ -125,12 +122,10 @@ class UserAuthService:
         return user_dto
     
     async def _authorize_user_hh(
-            self, authorization_code: str,
-            state: str
+            self, authorization_code: str
         ) -> OauthTokenDTO:
         hh_oauth_tokens_dto = await self.hh_auth_service.authorize_user(
-            authorization_code,
-            state
+            authorization_code
         )
 
         return hh_oauth_tokens_dto

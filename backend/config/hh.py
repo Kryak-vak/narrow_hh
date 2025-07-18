@@ -13,7 +13,6 @@ class HHConfig(BaseSettings):
     app_name: str
     client_id: str
     client_secret: str
-    redirect_uri: str
     contact_email: str
 
 

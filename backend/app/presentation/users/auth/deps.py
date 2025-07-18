@@ -3,6 +3,7 @@ from redis.asyncio import Redis
 
 from app.application.common.csrf import StateManager
 from app.application.hh.auth.oauth import HHOAuthService
+from app.application.users.auth.jwt import JWTManager
 from app.application.users.auth.user import UserAuthService
 from app.infrastructure.database import RedisStateRepository
 from app.infrastructure.database.users.repositories import (
@@ -34,11 +35,9 @@ def get_user_token_repository(session: SessionDep) -> UserTokenRepository:
 
 def get_hh_auth_service(
         session: SessionDep,
-        state_manager: StateManager = Depends(get_state_manager),
     ) -> HHOAuthService:
     return HHOAuthService(
         session=session,
-        state_manager=state_manager,
     )
 
 def get_user_auth_service(
@@ -46,15 +45,16 @@ def get_user_auth_service(
         user_repository: UserRepository = Depends(get_user_repository),
         user_token_repo: UserTokenRepository = Depends(get_user_token_repository),
         hh_token_repo: HeadHunterTokenRepository = Depends(get_hh_token_repository),
-        state_manager: StateManager = Depends(get_state_manager),
         hh_auth_service: HHOAuthService = Depends(get_hh_auth_service),
+        state_manager: StateManager = Depends(get_state_manager),
     ) -> UserAuthService:
     return UserAuthService(
         session=session,
         user_repo=user_repository,
         user_token_repo=user_token_repo,
         hh_token_repo=hh_token_repo,
+        hh_auth_service=hh_auth_service,
         state_manager=state_manager,
-        hh_auth_service=hh_auth_service
+        jwt_manager=JWTManager(),
     )
     

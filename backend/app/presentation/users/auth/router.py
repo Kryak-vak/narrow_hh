@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends
 
 from app.application.users.auth.user import UserAuthService
-from app.presentation.schemas import ErrorResponse, URLSchema
+from app.presentation.schemas import URLSchema
 from app.presentation.users.auth.deps import get_user_auth_service
-from app.presentation.users.auth.schemas import StartAuthPayloadSchema
-from config.hh import hh_config
+from app.presentation.users.auth.schemas import (
+    AuthCallbackPayloadSchema,
+    AuthStartPayloadSchema,
+    TokenPairSchema,
+)
 
 router = APIRouter(
     prefix="/users",
@@ -13,43 +16,38 @@ router = APIRouter(
 
 
 @router.post(
-    "/login_via_hh", 
+    "/login_via_hh/start", 
     response_model=URLSchema
 )
-async def login_via_hh(
-        payload: StartAuthPayloadSchema,
+async def login_via_hh_start(
+        payload: AuthStartPayloadSchema,
         user_auth_service: UserAuthService = Depends(get_user_auth_service)
     ) -> dict:
     """
-    HH Oauth start.
+    Get a custom Headhunter's authorize url.
     """
     authorize_url = await user_auth_service.start_auth_hh(
         state=payload.state,
-        notify_url=payload.notify_url,
-        redirect_url=payload.redirect_url
+        interface_redirect_url=payload.redirect_url
     )
 
     return URLSchema(url=authorize_url)
 
 
 @router.post(
-    f"{hh_config.redirect_uri}",
-    responses={
-        400: {"model": ErrorResponse, "description": "User denied access"}
-    }
+    "/login_via_hh/callback",
+    response_model=TokenPairSchema,
 )
-async def oauth_callback(
-        code: str,
-        state: str,
-        error: str = None,
+async def login_via_hh_callback(
+        payload: AuthCallbackPayloadSchema,
         user_auth_service: UserAuthService = Depends(get_user_auth_service)
     ) -> dict:
     """
-    HH Oauth callback.
+    Get access tokens from HeadHunter's authorization code.
     """
-    if error == "access_denied":  # TODO Add custom error with error_handler
-        return {"error": "access denied by user"}
+    token_pair_dto = await user_auth_service.login(payload.code, payload.state)
 
-    access_token = await user_auth_service.get_tokens(code, state)
-
-    return {"access_token": access_token}
+    return TokenPairSchema(
+        token_pair_dto.access_token,
+        token_pair_dto.refresh_token,
+    )

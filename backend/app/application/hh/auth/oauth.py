@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.common.csrf import StateManager
 from app.application.hh.auth.dto import OauthTokenDTO
 from app.infrastructure.clients import HHAsyncClient
 
@@ -8,20 +7,16 @@ from app.infrastructure.clients import HHAsyncClient
 class HHOAuthService():
     def __init__(
             self, session: AsyncSession,
-            state_manager: StateManager
         ) -> None:
         self.session = session
-
-        self.state_manager = state_manager
         self.hh_client = HHAsyncClient
     
-    async def get_user_authorize_url(self, state: str) -> str:
-        return self.hh_client.create_user_authorize_url(state)
+    def get_user_authorize_url(self, state: str, redirect_uri: str) -> str:
+        return self.hh_client.create_user_authorize_url(state, redirect_uri)
     
     async def authorize_user(
-            self, authorization_code: str, state: str
+            self, authorization_code: str,
         ) -> OauthTokenDTO:
-        await self.state_manager.validate_state(state)
 
         hh_oauth_tokens_dto = await self.get_tokens(authorization_code)
 
