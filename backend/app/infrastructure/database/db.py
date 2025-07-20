@@ -1,4 +1,4 @@
-from redis.asyncio import Redis
+from redis.asyncio.client import Redis
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from config.database import database_config

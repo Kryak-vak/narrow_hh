@@ -24,13 +24,15 @@ class DatabaseConfig(BaseSettings):
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
-        return MultiHostUrl.build(
-            scheme="postgresql+asyncpg",
-            username=self.user,
-            password=self.password,
-            host=self.host,
-            port=self.port,
-            path=self.db,
+        return PostgresDsn(
+            str(MultiHostUrl.build(
+                scheme="postgresql+asyncpg",
+                username=self.user,
+                password=self.password,
+                host=self.host,
+                port=self.port,
+                path=self.db,
+            ))
         )
 
 

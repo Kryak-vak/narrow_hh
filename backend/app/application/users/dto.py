@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -11,7 +10,6 @@ class UserBaseDTO(BaseModel):
 
 class UserDTO(UserBaseDTO):
     id: UUID
-    hh_token: Optional["HeadHunterTokenNestedDTO"] = None
 
     model_config = ConfigDict(from_attributes=True)
 

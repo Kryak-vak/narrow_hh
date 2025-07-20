@@ -1,4 +1,4 @@
-from typing import Dict, TypeVar, Union
+from typing import TypeVar
 
 from pydantic import BaseModel
 
@@ -7,5 +7,5 @@ CreateDTOType = TypeVar("CreateDTOType", bound=BaseModel)
 UpdateDTOType = TypeVar("UpdateDTOType", bound=BaseModel)
 
 
-RedisPrimitive = Union[str, int, float, bytes]
-RedisHash = Dict[str, str]
+RedisPrimitive = str | int | float | bytes
+RedisHash = dict[str, str]

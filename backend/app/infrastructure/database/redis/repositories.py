@@ -1,4 +1,4 @@
-from redis import Redis
+from redis.asyncio.client import Redis
 
 from app.infrastructure.database.base.repositories import AbstractRedisRepository
 from config.redis import redis_config

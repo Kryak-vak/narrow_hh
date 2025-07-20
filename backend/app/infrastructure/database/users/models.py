@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,7 +9,7 @@ from app.infrastructure.database.base import BaseTimeStamped
 class User(BaseTimeStamped):
     __tablename__ = "users"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(default=uuid4, primary_key=True)
     hh_user_id: Mapped[str] = mapped_column(unique=True, nullable=False)
     
     hh_token: Mapped["HeadHunterToken"] = relationship(
@@ -29,7 +29,7 @@ class UserRefreshToken(BaseTimeStamped):
 
     id: Mapped[str] = mapped_column(String(255), primary_key=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), unique=True)
-    user: Mapped["User"] = relationship(back_populates="token")
+    user: Mapped["User"] = relationship(back_populates="refresh_token")
 
     is_blacklisted: Mapped[bool] = mapped_column(default=False)
     

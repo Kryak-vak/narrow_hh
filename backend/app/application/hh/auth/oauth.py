@@ -16,15 +16,16 @@ class HHOAuthService():
     
     async def authorize_user(
             self, authorization_code: str,
+            redirect_uri: str,
         ) -> OauthTokenDTO:
 
-        hh_oauth_tokens_dto = await self.get_tokens(authorization_code)
+        hh_oauth_tokens_dto = await self.get_tokens(authorization_code, redirect_uri)
 
         return hh_oauth_tokens_dto
     
-    async def get_tokens(self, authorization_code: str) -> OauthTokenDTO:
+    async def get_tokens(self, authorization_code: str, redirect_uri: str) -> OauthTokenDTO:
         async with self.hh_client() as client:
-            oauth_tokens_data = await client.make_token_request(authorization_code)
+            oauth_tokens_data = await client.make_token_request(authorization_code, redirect_uri)
         
         return OauthTokenDTO(**oauth_tokens_data)
 

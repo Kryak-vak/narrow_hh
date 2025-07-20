@@ -10,6 +10,7 @@ from app.application.users.auth.dto import JWTEntity, JWTPairDTO, JWTType
 from app.application.users.auth.jwt import JWTManager
 from app.application.users.dto import (
     HeadHunterTokenCreateDTO,
+    HeadHunterTokenDTO,
     HeadHunterTokenUpdateDTO,
     UserCreateDTO,
     UserDTO,
@@ -46,29 +47,32 @@ class UserAuthService:
     
     async def start_auth_hh(
             self, state: str,
-            interface_redirect_url: str = None
+            interface_redirect_url: str
         ) -> str:
-        await self.state_manager.set_state_ex(state)
+        await self.state_manager.set_state_ex(state, str(interface_redirect_url))
 
         return self.hh_auth_service.get_user_authorize_url(state, interface_redirect_url)
     
     async def login(self, authorization_code: str, state: str):
-        await self.state_manager.validate_state(state)
+        interface_redirect_url = await self.state_manager.get_state(state)
 
-        user_dto = await self._get_or_create_user_hh(authorization_code)
+        user_dto = await self._get_or_create_user_hh(authorization_code, interface_redirect_url)
         token_pair = self._create_token_pair(user_dto.id)
-        
+
         await self.__create_refresh_token_in_database(token_pair.refresh_token, user_dto.id)
 
         return token_pair
     
-    async def refresh(self, token: str) -> str:
+    async def refresh(self, token: str) -> JWTPairDTO:
         jwt_entity = JWTEntity(
             **self.jwt_manager.decode_token(token)
         )
-        self.__check_token_is_valid(token, jwt_entity, JWTType.REFRESH)
+        await self.__check_token_is_valid(token, jwt_entity, JWTType.REFRESH)
 
         user_dto = await self.user_repo.get(id=jwt_entity.user_id)
+        if user_dto is None:
+            raise(RuntimeError("invalid user_id in token"))  # TODO add custom exception
+
         return self._create_token_pair(user_dto.id)
     
     def _create_token_pair(self, user_id: UUID) -> JWTPairDTO:
@@ -80,15 +84,20 @@ class UserAuthService:
             refresh_token=refresh_token
         )
 
-    async def _get_or_create_user_hh(self, authorization_code: str) -> UserDTO:
-        hh_oauth_tokens_dto = await self._authorize_user_hh(authorization_code)
+    async def _get_or_create_user_hh(
+            self, authorization_code: str,
+            interface_redirect_url: str
+        ) -> UserDTO:
+        hh_oauth_tokens_dto = await self._authorize_user_hh(
+            authorization_code, interface_redirect_url
+        )
         hh_user_dto = await self._get_hh_user_info(hh_oauth_tokens_dto.access_token)
         
         user_dto = await self.user_repo.get(hh_user_id=hh_user_dto.id)
-        if not user_dto:
+        if user_dto is None:
             user_dto = await self._create_user_with_hh_token(hh_user_dto.id, hh_oauth_tokens_dto)
         else:
-            user_dto = await self._update_user_hh_token(user_dto, hh_oauth_tokens_dto)
+            await self._update_user_hh_token(user_dto.id, hh_oauth_tokens_dto)
         
         return user_dto
     
@@ -97,10 +106,10 @@ class UserAuthService:
             UserCreateDTO(hh_user_id=hh_user_id)
         )
 
-        self.hh_token_repo.create(
+        await self.hh_token_repo.create(
             HeadHunterTokenCreateDTO(
-                user_id=user_dto.id
-                **hh_oauth_tokens_dto
+                user_id=user_dto.id,
+                **hh_oauth_tokens_dto.model_dump()
             )
         )
 
@@ -110,22 +119,29 @@ class UserAuthService:
         return user_dto
     
     async def _update_user_hh_token(
-            self, user_dto: UserDTO,
+            self, user_id: UUID,
             hh_oauth_tokens_dto: OauthTokenDTO
-        ) -> UserDTO:
-        await self.hh_token_repo.update(
-            user_dto.hh_token.id,
-            HeadHunterTokenUpdateDTO(**hh_oauth_tokens_dto)
-        )
-        user_dto = await self.user_repo.refresh(user_dto)
+        ) -> HeadHunterTokenDTO:
+        user_hh_token_dto = await self.hh_token_repo.get(with_related=False, user_id=user_id)
+        if user_hh_token_dto is None:
+            raise ValueError(
+                f"HeadHunterToken for user {user_id} not found"
+            )  # TODO add custom exception
 
-        return user_dto
+        hh_token_dto = await self.hh_token_repo.update(
+            user_hh_token_dto.id,
+            HeadHunterTokenUpdateDTO(**hh_oauth_tokens_dto.model_dump())
+        )
+
+        return hh_token_dto
     
     async def _authorize_user_hh(
-            self, authorization_code: str
+            self, authorization_code: str,
+            interface_redirect_url: str,
         ) -> OauthTokenDTO:
         hh_oauth_tokens_dto = await self.hh_auth_service.authorize_user(
-            authorization_code
+            authorization_code,
+            interface_redirect_url
         )
 
         return hh_oauth_tokens_dto

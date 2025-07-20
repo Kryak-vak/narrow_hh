@@ -1,3 +1,6 @@
+from sqlalchemy import Select
+from sqlalchemy.orm import selectinload
+
 from app.application.users.dto import (
     HeadHunterTokenCreateDTO,
     HeadHunterTokenDTO,
@@ -23,6 +26,9 @@ class UserRepository(
     ):
     model = User
     read_dto = UserDTO
+
+    def _apply_loader_options(self, stmt: Select) -> Select:
+        return stmt.options(selectinload(User.hh_token))
 
 
 class HeadHunterTokenRepository(
