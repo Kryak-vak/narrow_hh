@@ -31,8 +31,8 @@ dev = [
 line-length = 100
 fix = true
 exclude = [
-    "app/infra/database/migrations.py",
-    "app/migrations/"
+    "src/app/migrations/",
+    "src/app/infrastracture/database/migrations.py",
 ]
 
 
@@ -43,8 +43,8 @@ line-length = 100
 python_version = "3.12"
 strict = true
 exclude = [
-   "app/migrations/",
-   "app/infrastracture/database/migrations.py",
+   "src/app/migrations/",
+   "src/app/infrastracture/database/migrations.py",
 ]
 
 
