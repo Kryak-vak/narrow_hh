@@ -2,8 +2,8 @@
 
 # Container and paths
 CONTAINER_NAME="narrow_hh-web-1"
-CONTAINER_MIGRATIONS_PATH="/backend/app/migrations/versions"
-HOST_MIGRATIONS_PATH="../app/migrations/versions"
+CONTAINER_MIGRATIONS_PATH="/app/migrations/versions"
+HOST_MIGRATIONS_PATH="../migrations/versions"
 
 # Ensure the local folder exists
 mkdir -p "$HOST_MIGRATIONS_PATH"

@@ -7,19 +7,20 @@ DOCKER_EXEC = docker compose exec -it
 build:
 	docker compose build
 
+clean:
+	docker image prune -f
+
 up: build
 	docker compose up --watch
 
 down:
 	docker compose down --remove-orphans
+	$(MAKE) clean
 
 reload: down up
 
 restart: 
 	docker compose restart $(SERVICE_NAME)
-
-up_it: build
-	docker compose up 
 
 logs:
 	docker compose logs $(SERVICE_NAME)
