@@ -1,7 +1,6 @@
 
 import pytest
 import sqlalchemy
-from faker import Faker
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from src.app.infrastructure.database.migrations import Base

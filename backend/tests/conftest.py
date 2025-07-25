@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 import pytest_asyncio
-from alembic import command, config
+from alembic import config
 from alembic.runtime.environment import EnvironmentContext
 from alembic.script import ScriptDirectory
 from sqlalchemy.ext.asyncio import (
@@ -68,7 +68,7 @@ async def run_migrations_programmatically(engine: AsyncEngine) -> None:
         await connection.run_sync(do_run_migrations_sync)
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def session(engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
     Session = async_sessionmaker(engine, expire_on_commit=False)
     async with Session() as session:
