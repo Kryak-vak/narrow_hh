@@ -22,6 +22,7 @@ from src.app.infrastructure.database.users.repositories import (
 )
 
 faker_ = Faker()
+test_amount = 3
 
 
 class TestUserRepository:
@@ -37,18 +38,25 @@ class TestUserRepository:
             UserCreateDTO(
                 hh_user_id=str(faker_.uuid4()),
             )
-            for _ in range(5)
+            for _ in range(test_amount)
         ],
         ids=lambda val: f"hh_id={val.hh_user_id}"
     )
     def user_create_dto(self, request):
         return request.param
     
-    @pytest.fixture(scope="class")
-    def user_update_dto(self):
-        return UserUpdateDTO(
-            hh_user_id=str(faker_.random_int(min=10000, max=999999))
-        )
+    @pytest.fixture(
+        scope="class",
+        params=[
+            UserUpdateDTO(
+                hh_user_id=str(faker_.uuid4()),
+            )
+            for _ in range(test_amount)
+        ],
+        ids=lambda val: f"hh_id={val.hh_user_id}"
+    )
+    def user_update_dto(self, request):
+        return request.param
 
     @pytest.fixture(scope="class")
     def user_dto(self):
@@ -60,19 +68,31 @@ class TestUserRepository:
     @pytest.mark.asyncio
     async def test_create(self, user_repository: UserRepository, user_create_dto: UserCreateDTO):
         user_db_dto = await user_repository.create(user_create_dto)
-        
-        assert all((
-            user_db_dto.hh_user_id == user_create_dto.hh_user_id,
-        ))
-        
+
         assert all(
-            key in user_db_dto.model_dump()
-            for key in (
-                "id",
-                "hh_user_id",
-            )
+            getattr(user_db_dto, key) == value
+            for key, value in user_create_dto.model_dump().items()
         )
 
         assert user_db_dto.id is not None
+    
+    @pytest.mark.asyncio
+    async def test_update(
+        self, user_repository: UserRepository,
+        user_create_dto: UserCreateDTO,
+        user_update_dto: UserUpdateDTO
+    ):
+        user_db_dto = await user_repository.create(user_create_dto)
+        user_updated_db_dto = await user_repository.update(
+            pk=user_db_dto.id,
+            update_dto=user_update_dto
+        )
+
+        assert user_updated_db_dto.id == user_db_dto.id
+        
+        assert all(
+            getattr(user_updated_db_dto, key) == value
+            for key, value in user_update_dto.model_dump().items()
+        )
 
 
