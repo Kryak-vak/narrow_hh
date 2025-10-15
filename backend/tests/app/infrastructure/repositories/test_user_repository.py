@@ -5,21 +5,11 @@ from faker import Faker
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app.application.users.dto import (
-    HeadHunterTokenCreateDTO,
-    HeadHunterTokenDTO,
-    HeadHunterTokenUpdateDTO,
     UserCreateDTO,
     UserDTO,
-    UserRefreshTokenCreateDTO,
-    UserRefreshTokenDTO,
-    UserRefreshTokenUpdateDTO,
     UserUpdateDTO,
 )
-from src.app.infrastructure.database.users.repositories import (
-    HeadHunterTokenRepository,
-    UserRepository,
-    UserTokenRepository,
-)
+from src.app.infrastructure.database.users.repositories import UserRepository
 
 faker_ = Faker()
 test_amount = 3

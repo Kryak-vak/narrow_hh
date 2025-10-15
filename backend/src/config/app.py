@@ -4,9 +4,11 @@ from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-ENV_DIR = Path(__file__).resolve().parent.parent.parent
+ENV_DIR = Path(__file__).resolve().parent.parent.parent.parent
 ENV_FILE = ENV_DIR / ".env"
 
+import sys
+print(f"{sys.path = }")
 
 class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(

@@ -7,7 +7,13 @@ from redis.typing import ExpiryT
 from sqlalchemy import Select, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.common_types import CreateDTOType, ReadDTOType, RedisHash, RedisPrimitive, UpdateDTOType
+from src.app.common_types import (
+    CreateDTOType,
+    ReadDTOType,
+    RedisHash,
+    RedisPrimitive,
+    UpdateDTOType,
+)
 from src.app.infrastructure.database.base.models import ModelType
 
 

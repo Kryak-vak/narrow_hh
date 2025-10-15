@@ -37,8 +37,8 @@ check:
 	uv run ruff check src/ main.py;
 	uv run mypy src/ main.py
 
-test: build
-	$(DOCKER_RUN) uv run pytest
+test: 
+	uv run pytest --rootdir=backend -c backend/pytest.ini
 
 migrations: build
 	$(DOCKER_RUN) poetry run alembic revision --autogenerate
